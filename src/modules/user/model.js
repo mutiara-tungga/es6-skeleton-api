@@ -27,7 +27,7 @@ export const Status = UserStatus;
 class UserModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
   get tableName() {
-    return 'user';
+    return 'users';
   }
   // eslint-disable-next-line class-methods-use-this
   get idAttribute() {
@@ -35,7 +35,7 @@ class UserModel extends bookshelf.Model {
   }
   // eslint-disable-next-line class-methods-use-this
   get hasTimestamps() {
-    return true;
+    return false;
   }
 
   /**
@@ -68,7 +68,17 @@ class UserModel extends bookshelf.Model {
   }
 
   static async createUser(user) {
+    user.password = bcrypt.hashSync(user.password, SALT_ROUND);
     return await new UserModel(user).save();
+  }
+
+  static async getByEmail(emailReq) {
+    return await this.where({ email: emailReq }).fetch();
+  }
+
+  static async updateById(idReq, newData) {
+    return await new UserModel({ id: idReq })
+    .save(newData, { patch: true });
   }
 }
 

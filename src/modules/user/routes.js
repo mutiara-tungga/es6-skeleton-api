@@ -16,4 +16,5 @@ routes.get('/user/:id*?',
   wrap(UserController.getUser),
   apiResponse());
 routes.post('/user', wrap(UserController.newUser), apiResponse());
+routes.get('/user/activation', wrap(UserController.accountActivation), apiResponse());
 export default routes;

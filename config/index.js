@@ -29,7 +29,7 @@ def.knex.connection.host = '127.0.0.1';
 def.knex.connection.user = 'root';
 def.knex.connection.password = '';
 // def.knex.connection.database = 'nustake';
-def.knex.connection.database = 'es6-skeleton';
+def.knex.connection.database = 'task2';
 def.knex.connection.charset = 'utf8';
 
 // jwt config

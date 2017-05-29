@@ -48,7 +48,7 @@ UserController.newUser = async (req, res, next) => {
     activation_code: activationCode,
   };
   const saveUser = await User.createUser(user);
-  if (saveUser) {
+  if (!saveUser) {
     const err = new Error('Create new user failed');
     return next(err);
   }
@@ -56,12 +56,12 @@ UserController.newUser = async (req, res, next) => {
     From: config.postmarkappServiceSender,
     To: saveUser.get('email'),
     Subject: 'Account Activation',
-    HtmlBody: `<html><body><p>Your Account: 
-    - First Name : ${saveUser.get('first_name')}
-    - Last Name : ${saveUser.get('last_name')}
-    - Email : ${saveUser.get('email')}
-    - Password : ${body.password}
-    To activate your account visit link below : 
+    HtmlBody: `<html><body><p>Your Account: <br>
+    - First Name : ${saveUser.get('first_name')} <br>
+    - Last Name : ${saveUser.get('last_name')} <br>
+    - Email : ${saveUser.get('email')} <br>
+    - Password : ${body.password} <br>
+    To activate your account visit this link:
     <a href='${linkActivation}'>Activate my account</a>
     </p><body></html>`,
   });
@@ -72,3 +72,34 @@ UserController.newUser = async (req, res, next) => {
   };
   return next();
 };
+
+UserController.accountActivation = async (req, res, next) => {
+  console.log('aaa');
+  const code = req.query.code;
+  const email = req.query.email;
+
+  const user = UserController.getByEmail(email);
+  if (!user) {
+    const err = new Error('User not found');
+    return next(err);
+  }
+
+  if (user.activation_code !== code) {
+    const err = new Error('Code didn\'t match');
+    return next(err);
+  }
+
+  const updateUser = UserController.updateById(user.get('id'), { status: 1 });
+  if (!updateUser) {
+    const err = new Error('Activation Failed');
+    return next(err);
+  }
+
+  req.resData = {
+    status: true,
+    message: 'User Data',
+    data: updateUser,
+  };
+  return next();
+};
+
