@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import randomstring from 'randomstring';
-
+import postmark from 'postmark';
 import { User } from './model';
 // import { jwt as jwtOptions } from '../../../config';
 import config from '../../../config';
@@ -8,6 +8,7 @@ import config from '../../../config';
 export const UserController = {};
 export default { UserController };
 
+const client = new postmark.Client(config.apiKeyPostmarkapp);
 /**
  * View user profile
  */
@@ -46,15 +47,28 @@ UserController.newUser = async (req, res, next) => {
     password: body.password,
     activation_code: activationCode,
   };
-  const save = await User.createUser(user);
-  if (save) {
+  const saveUser = await User.createUser(user);
+  if (saveUser) {
     const err = new Error('Create new user failed');
     return next(err);
   }
-  
+  client.sendEmail({
+    From: config.postmarkappServiceSender,
+    To: saveUser.get('email'),
+    Subject: 'Account Activation',
+    HtmlBody: `<html><body><p>Your Account: 
+    - First Name : ${saveUser.get('first_name')}
+    - Last Name : ${saveUser.get('last_name')}
+    - Email : ${saveUser.get('email')}
+    - Password : ${body.password}
+    To activate your account visit link below : 
+    <a href='${linkActivation}'>Activate my account</a>
+    </p><body></html>`,
+  });
   req.resData = {
     status: true,
     message: 'User Data',
-    data: save,
+    data: saveUser,
   };
+  return next();
 };

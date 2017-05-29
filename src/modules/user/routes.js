@@ -15,5 +15,5 @@ routes.get('/user/:id*?',
   passport.authenticate('jwt', {}),
   wrap(UserController.getUser),
   apiResponse());
-
+routes.post('/user', wrap(UserController.newUser), apiResponse());
 export default routes;

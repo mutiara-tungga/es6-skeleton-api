@@ -31,7 +31,7 @@ class UserModel extends bookshelf.Model {
   }
   // eslint-disable-next-line class-methods-use-this
   get idAttribute() {
-    return 'user_id';
+    return 'id';
   }
   // eslint-disable-next-line class-methods-use-this
   get hasTimestamps() {
@@ -68,8 +68,7 @@ class UserModel extends bookshelf.Model {
   }
 
   static async createUser(user) {
-    user.password = bcrypt.hashPasswordSync(user.password);
-    return await this(user).save();
+    return await new UserModel(user).save();
   }
 }
 
