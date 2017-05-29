@@ -78,18 +78,19 @@ UserController.accountActivation = async (req, res, next) => {
   const code = req.query.code;
   const email = req.query.email;
 
-  const user = UserController.getByEmail(email);
+  const user = await User.getByEmail(email);
+  console.log(user);
   if (!user) {
     const err = new Error('User not found');
     return next(err);
   }
 
-  if (user.activation_code !== code) {
+  if (user.get('activation_code') !== code) {
     const err = new Error('Code didn\'t match');
     return next(err);
   }
 
-  const updateUser = UserController.updateById(user.get('id'), { status: 1 });
+  const updateUser = await User.updateById(user.get('id'), { status: 1 });
   if (!updateUser) {
     const err = new Error('Activation Failed');
     return next(err);
@@ -97,7 +98,7 @@ UserController.accountActivation = async (req, res, next) => {
 
   req.resData = {
     status: true,
-    message: 'User Data',
+    message: 'Activation success',
     data: updateUser,
   };
   return next();
