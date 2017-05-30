@@ -72,3 +72,23 @@ export function validateToken() {
     });
   };
 }
+
+export function validateForgotPassword() {
+  return (req, res, next) => {
+    const hasError = validate(req.body, constraints.forgotPassword);
+    if (hasError) {
+      next(hasError);
+    }
+    next();
+  };
+}
+
+export function validateResetPassword() {
+  return (req, res, next) => {
+    const hasError = validate(req.body, constraints.resetPassword);
+    if (hasError) {
+      next(hasError);
+    }
+    next();
+  };
+}

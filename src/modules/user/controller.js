@@ -42,15 +42,16 @@ UserController.newUser = async (req, res, next) => {
   const uniqueEmail = await User.getByEmail(body.email);
   if (uniqueEmail) {
     const err = new Error('Email must be unique');
-    next(err);
+    return next(err);
   }
   const activationCode = randomstring.generate(20);
   const linkActivation = `${config.baseurl}/user/activation?code=${activationCode}&email=${body.email}`;
+  const hashPassword = User.hashPasswordSync(body.password);
   const user = {
     first_name: body.firstName,
     last_name: body.lastName,
     email: body.email,
-    password: body.password,
+    password: hashPassword,
     activation_code: activationCode,
   };
   const saveUser = await User.createUser(user);
@@ -146,7 +147,7 @@ UserController.profile = async (req, res, next) => {
   const user = await User.getById(id);
   if (!user) {
     const err = new Error('User not found');
-    next(err);
+    return next(err);
   }
   const profile = {
     firstName: user.get('first_name'),
@@ -159,6 +160,70 @@ UserController.profile = async (req, res, next) => {
     message: 'Your profile',
     data: profile,
   };
-  next();
+  return next();
+};
+
+// FOR FORGOT PASSWORD
+UserController.forgotPassword = async (req, res, next) => {
+  const email = req.body.email;
+  const code = randomstring.generate(20);
+  const user = await User.getByEmail(email);
+  if (!user) {
+    const err = new Error('Email not found');
+    return next(err);
+  }
+  const sendCode = await User.updateById(user.get('id'), { reset_password_code: code });
+  if (!sendCode) {
+    const err = new Error('Error send code');
+    return next(err);
+  }
+  client.sendEmail({
+    From: config.postmarkappServiceSender,
+    To: user.get('email'),
+    Subject: 'Reset Password',
+    TextBody: `To reset your password use this code : ${sendCode.get('reset_password_code')}`,
+  });
+  req.resData = {
+    status: true,
+    message: 'Check your email for reset password',
+    data: {},
+  };
+  return next();
+};
+
+// FOR reset password
+UserController.resetPassword = async (req, res, next) => {
+  const email = req.body.email;
+  const resetCode = req.body.resetCode;
+  const newPassword = req.body.newPassword;
+  const user = await User.getByEmail(email);
+
+  if (!user) {
+    const err = new Error('Email not found');
+    return next(err);
+  }
+  if (user.get('reset_password_code') === null) {
+    const err = new Error('You didn\'t have reset code for password');
+    return next(err);
+  }
+  if (user.get('reset_password_code') !== resetCode) {
+    const err = new Error('Code didn\'t match');
+    return next(err);
+  }
+  const hashPassword = User.hashPasswordSync(newPassword);
+  const updateUser = await User.updateById(user.get('id'), {
+    password: hashPassword,
+    reset_password_code: null,
+  });
+  if (!updateUser) {
+    const err = new Error('Update password failed');
+    return next(err);
+  }
+  req.resData = {
+    status: true,
+    message: 'Update password success',
+    data: {},
+  };
+  return next();
 };
 

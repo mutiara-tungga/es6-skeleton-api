@@ -72,7 +72,6 @@ class UserModel extends bookshelf.Model {
   }
 
   static async createUser(user) {
-    user.password = bcrypt.hashSync(user.password, SALT_ROUND);
     return await new UserModel(user).save();
   }
 

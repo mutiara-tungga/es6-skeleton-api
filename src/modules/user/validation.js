@@ -30,4 +30,22 @@ constraints.createNew = {
   },
 };
 
+constraints.forgotPassword = {
+  email: {
+    presence: true,
+  },
+};
+
+constraints.resetPassword = {
+  email: {
+    presence: true,
+  },
+  resetCode: {
+    presence: true,
+  },
+  newPassword: {
+    presence: true,
+  },
+};
+
 export default constraints;
