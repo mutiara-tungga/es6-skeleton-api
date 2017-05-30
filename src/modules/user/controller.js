@@ -127,7 +127,6 @@ UserController.login = async (req, res, next) => {
   }
   const payload = user.get('id');
   const token = jwt.sign(payload, config.jwt.secretOrKey);
-  console.log(user);
   req.resData = {
     status: true,
     message: 'Login success',
@@ -135,4 +134,8 @@ UserController.login = async (req, res, next) => {
   };
   return next();
 };
+
+// FOR PROFILE
+// UserController.profile = async (req, res, next) => {
+// }
 

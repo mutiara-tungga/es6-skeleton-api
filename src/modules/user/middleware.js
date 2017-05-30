@@ -40,6 +40,6 @@ export function validateLogin() {
     if (hasError) {
       next(hasError);
     }
-    return next();
+    next();
   };
 }
