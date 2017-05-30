@@ -136,6 +136,24 @@ UserController.login = async (req, res, next) => {
 };
 
 // FOR PROFILE
-// UserController.profile = async (req, res, next) => {
-// }
+UserController.profile = async (req, res, next) => {
+  const id = req.decoded;
+  const user = await User.getById(id);
+  if (!user) {
+    const err = new Error('User not found');
+    next(err);
+  }
+  const profile = {
+    firstName: user.get('first_name'),
+    lastName: user.get('last_name'),
+    email: user.get('email'),
+  };
+
+  req.resData = {
+    status: true,
+    message: 'Your profile',
+    data: profile,
+  };
+  next();
+};
 

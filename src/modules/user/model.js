@@ -54,8 +54,12 @@ class UserModel extends bookshelf.Model {
     return bcrypt.hashSync(str, SALT_ROUND);
   }
 
-  static async getById(id) {
-    return await this.where({ user_id: id }).fetch();
+  static async getById(idReq) {
+    return await this.where({ id: idReq }).fetch();
+  }
+
+  static async getByEmail(emailReq) {
+    return await this.where({ email: emailReq }).fetch();
   }
 
   /**
@@ -70,10 +74,6 @@ class UserModel extends bookshelf.Model {
   static async createUser(user) {
     user.password = bcrypt.hashSync(user.password, SALT_ROUND);
     return await new UserModel(user).save();
-  }
-
-  static async getByEmail(emailReq) {
-    return await this.where({ email: emailReq }).fetch();
   }
 
   static async updateById(idReq, newData) {

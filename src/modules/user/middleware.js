@@ -1,7 +1,9 @@
 import _ from 'lodash';
 import validate from 'validate.js';
+import jwt from 'jsonwebtoken';
 import constraints from './validation';
 import utils from '../../../common/utils';
+import { jwt as jwtOptions } from '../../../config';
 
 export const ROLE_ALL = '*';
 
@@ -41,5 +43,23 @@ export function validateLogin() {
       next(hasError);
     }
     next();
+  };
+}
+
+// FOR VALIDATE TOKEN
+export function validateToken() {
+  return (req, res, next) => {
+    const token = req.headers.auth;
+    if (!token) {
+      const err = new Error('No token');
+      next(err);
+    }
+    jwt.verify(token, jwtOptions.secretOrKey, (err, decoded) => {
+      if (err) {
+        next(err);
+      }
+      req.decoded = decoded;
+      next();
+    });
   };
 }
