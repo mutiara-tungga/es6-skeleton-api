@@ -1,6 +1,6 @@
 import express from 'express';
 // import passport from 'passport';
-import { validateLogin, validateToken } from './middleware';
+import { validateLogin, validateToken, validateCreateNew } from './middleware';
 import { UserController } from './controller';
 import core from '../core';
 import { apiResponse } from '../core/middleware';
@@ -16,7 +16,7 @@ const { wrap } = core.utils;
 //   passport.authenticate('local', {}),
 //   wrap(UserController.getUser),
 //   apiResponse());
-routes.post('/user', wrap(UserController.newUser), apiResponse());
+routes.post('/user', validateCreateNew(), wrap(UserController.newUser), apiResponse());
 routes.get('/user/activation', wrap(UserController.accountActivation), apiResponse());
 routes.post('/user/login', validateLogin(), wrap(UserController.login), apiResponse());
 routes.post('/user/profile', validateToken(), wrap(UserController.profile), apiResponse());

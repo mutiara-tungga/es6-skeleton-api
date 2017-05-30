@@ -12,4 +12,22 @@ constraints.login = {
   },
 };
 
+constraints.createNew = {
+  firstName: {
+    presence: true,
+  },
+  lastName: {
+    presence: true,
+  },
+  email: {
+    presence: true,
+    email: {
+      message: "doesn't look like a valid email",
+    },
+  },
+  password: {
+    presence: true,
+  },
+};
+
 export default constraints;

@@ -39,6 +39,11 @@ UserController.getUser = async (req, res, next) => {
 // FOR CREATE NEW USER
 UserController.newUser = async (req, res, next) => {
   const body = req.body;
+  const uniqueEmail = await User.getByEmail(body.email);
+  if (uniqueEmail) {
+    const err = new Error('Email must be unique');
+    next(err);
+  }
   const activationCode = randomstring.generate(20);
   const linkActivation = `${config.baseurl}/user/activation?code=${activationCode}&email=${body.email}`;
   const user = {

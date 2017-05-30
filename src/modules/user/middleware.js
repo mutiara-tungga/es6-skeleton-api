@@ -32,7 +32,16 @@ export function auth(roles, failedCb) {
     return reject(req, res);
   };
 }
-
+// FOR VALIDATE CREATE NEW USER
+export function validateCreateNew() {
+  return (req, res, next) => {
+    const hasError = validate(req.body, constraints.createNew);
+    if (hasError) {
+      next(hasError);
+    }
+    next();
+  };
+}
 /**
  * Login form validation middleware
  */
