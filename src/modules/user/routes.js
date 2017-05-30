@@ -17,4 +17,5 @@ const { wrap } = core.utils;
 //   apiResponse());
 routes.post('/user', wrap(UserController.newUser), apiResponse());
 routes.get('/user/activation', wrap(UserController.accountActivation), apiResponse());
+routes.post('/user/login', wrap(UserController.login), apiResponse());
 export default routes;

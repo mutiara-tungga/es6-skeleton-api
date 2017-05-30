@@ -24,7 +24,7 @@ UserController.getUser = async (req, res, next) => {
   }
   if (req.route.path === '/user/login') {
     const payload = { user_id: profile.user_id };
-    const token = jwt.sign(payload, config.secretOrKey);
+    const token = jwt.sign(payload, config.jwt.secretOrKey);
     profile.token = token;
   }
   delete profile.password;
@@ -36,6 +36,7 @@ UserController.getUser = async (req, res, next) => {
   return next();
 };
 
+// FOR CREATE NEW USER
 UserController.newUser = async (req, res, next) => {
   const body = req.body;
   const activationCode = randomstring.generate(20);
@@ -65,6 +66,8 @@ UserController.newUser = async (req, res, next) => {
     <a href='${linkActivation}'>Activate my account</a>
     </p><body></html>`,
   });
+  delete saveUser.password;
+  delete saveUser.activation_code;
   req.resData = {
     status: true,
     message: 'User Data',
@@ -73,13 +76,12 @@ UserController.newUser = async (req, res, next) => {
   return next();
 };
 
+// FOR ACTIVATE ACCOUNT
 UserController.accountActivation = async (req, res, next) => {
-  console.log('aaa');
   const code = req.query.code;
   const email = req.query.email;
 
   const user = await User.getByEmail(email);
-  console.log(user);
   if (!user) {
     const err = new Error('User not found');
     return next(err);
@@ -95,11 +97,41 @@ UserController.accountActivation = async (req, res, next) => {
     const err = new Error('Activation Failed');
     return next(err);
   }
-
+  delete updateUser.password;
+  delete updateUser.activation_code;
   req.resData = {
     status: true,
     message: 'Activation success',
     data: updateUser,
+  };
+  return next();
+};
+
+// FOR LOGIN USE WITH JWT TOKEN
+UserController.login = async (req, res, next) => {
+  const emailReq = req.body.email;
+  const passwordReq = req.body.password;
+  const user = await User.getByEmail(emailReq);
+  if (!user) {
+    const err = new Error('User not found');
+    return next(err);
+  }
+  if (user.get('status') !== 1) {
+    const err = new Error('Please activate your account');
+    return next(err);
+  }
+  const matchPassword = user.checkPassword(passwordReq);
+  if (!matchPassword) {
+    const err = new Error('Password did\'t match');
+    return next(err);
+  }
+  const payload = user.get('id');
+  const token = jwt.sign(payload, config.jwt.secretOrKey);
+  console.log(user);
+  req.resData = {
+    status: true,
+    message: 'Login success',
+    data: { token },
   };
   return next();
 };
